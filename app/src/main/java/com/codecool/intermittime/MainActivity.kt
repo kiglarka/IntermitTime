@@ -1,5 +1,6 @@
 package com.codecool.intermittime
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         startButton.setOnClickListener(object : View.OnClickListener{
             override fun onClick(v: View?) {
+                startService()
                 if (runningObservable.value){
                     pauseTimer()
                 } else {
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(RUNNING_TAG, "onCreate: ${runningObservable.value}")
         }
 
-        resetButton.setOnClickListener(object : View.OnClickListener{
+        stopButton.setOnClickListener(object : View.OnClickListener{
             override fun onClick(v: View?) {
                 resetTimer()
             }
@@ -94,7 +96,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateButton(){
         if (runningObservable.value){
-            resetButton.visibility = View.INVISIBLE
+            stopButton.visibility = View.INVISIBLE
             startButton.text = "pause"
         }else{
             startButton.text = "start"
@@ -106,9 +108,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             if(timeLeftInMillis < START_TIME_IN_MILLIS){
-                resetButton.visibility = View.VISIBLE
+                stopButton.visibility = View.VISIBLE
             } else {
-                resetButton.visibility = View.INVISIBLE
+                stopButton.visibility = View.INVISIBLE
             }
         }
     }
@@ -135,6 +137,18 @@ class MainActivity : AppCompatActivity() {
             timeLeftInMillis = endTime!! - System.currentTimeMillis()
             startTimer()
         }
+    }
+
+    private fun startService(){
+        val input = editText.text.toString()
+        val serviceIntent = Intent(this,TimerService::class.java)
+        serviceIntent.putExtra("input",input)
+        startService(serviceIntent)
+    }
+
+    private fun stopService(){
+        val serviceIntent = Intent(this,TimerService::class.java)
+        stopService(serviceIntent)
     }
 }
 
