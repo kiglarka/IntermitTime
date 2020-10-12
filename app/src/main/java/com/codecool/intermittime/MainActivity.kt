@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         outState.putLong("millisLeft", timeLeftInMillis)
         outState.putBoolean("timerRunning", runningObservable.value)
         Log.d(SAVED_INSTANCE_TAG, "onSaveInstanceState: ${runningObservable.value}")
-        endTime?.let { outState.getLong("endTime", it) }
+        endTime?.let { outState.putLong("endTime", it) }
 
     }
 
