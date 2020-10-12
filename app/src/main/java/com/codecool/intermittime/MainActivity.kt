@@ -16,24 +16,20 @@ class MainActivity : AppCompatActivity() {
 
     companion object{
         private  const val START_TIME_IN_MILLIS : Long = 600000
-        private const val RUNNING_TAG = "Timer running?"
+        private const val RUNNING_TAG = "Timer running? "
+        private const val SAVED_INSTANCE_TAG = "Running status: "
+        private const val RESTORED_INSTANCE_TAG = "Running status: "
     }
 
     private lateinit var countDownTimer: CountDownTimer
-
-    //private var isTimerRunning : Boolean? = null
     private var runningObservable = Variable(false)
 
     private var timeLeftInMillis = START_TIME_IN_MILLIS
-
+    private var endTime : Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        runningObservable.observable.subscribe{
-            Log.d(RUNNING_TAG, "onCreate: ${runningObservable.value}")
-        }
 
         startButton.setOnClickListener(object : View.OnClickListener{
             override fun onClick(v: View?) {
@@ -44,6 +40,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+
+        runningObservable.observable.subscribe{
+            Log.d(RUNNING_TAG, "onCreate: ${runningObservable.value}")
+        }
 
         resetButton.setOnClickListener(object : View.OnClickListener{
             override fun onClick(v: View?) {
@@ -58,17 +58,16 @@ class MainActivity : AppCompatActivity() {
         timeLeftInMillis = START_TIME_IN_MILLIS
         updateCountDowndText()
         updateButton()
-        //
     }
 
     private fun pauseTimer() {
         countDownTimer.cancel()
         runningObservable.value = false
         updateButton()
-        //
     }
 
     private fun startTimer() {
+        endTime = System.currentTimeMillis() + timeLeftInMillis
         countDownTimer = object: CountDownTimer(timeLeftInMillis, 1000){
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
@@ -117,7 +116,9 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putLong("millisLeft", timeLeftInMillis)
-        outState.getBoolean("timerRunning", runningObservable.value)
+        outState.putBoolean("timerRunning", runningObservable.value)
+        Log.d(SAVED_INSTANCE_TAG, "onSaveInstanceState: ${runningObservable.value}")
+        endTime?.let { outState.getLong("endTime", it) }
 
     }
 
@@ -125,10 +126,13 @@ class MainActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         timeLeftInMillis = savedInstanceState.getLong("millisLeft")
         runningObservable.value = savedInstanceState.getBoolean("timerRunning")
+        Log.d(RESTORED_INSTANCE_TAG, "onRestoreInstanceState: ${runningObservable.value}")
         updateCountDowndText()
         updateButton()
 
         if (runningObservable.value){
+            endTime = savedInstanceState.getLong("endTime")
+            timeLeftInMillis = endTime!! - System.currentTimeMillis()
             startTimer()
         }
     }
