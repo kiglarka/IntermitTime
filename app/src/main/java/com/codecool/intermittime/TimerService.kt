@@ -7,11 +7,21 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.codecool.intermittime.App.Companion.CHANNEL_ID
+import kotlin.properties.Delegates
+
+enum class TimerType()
 
 class TimerService : Service() {
 
+    private var startTime by Delegates.notNull<Long>()
+
+    fun getRunningTime() : Long{
+        return System.currentTimeMillis() - startTime
+    }
+
     override fun onCreate() {
         super.onCreate()
+        startTime = System.currentTimeMillis()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -27,6 +37,7 @@ class TimerService : Service() {
             .build()
 
         startForeground(1,notification)
+
         return START_REDELIVER_INTENT
     }
 

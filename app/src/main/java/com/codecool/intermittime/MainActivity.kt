@@ -43,6 +43,12 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        stopButton.setOnClickListener(object : View.OnClickListener{
+            override fun onClick(v: View?) {
+                stopService()
+            }
+        })
+
         runningObservable.observable.subscribe{
             Log.d(RUNNING_TAG, "onCreate: ${runningObservable.value}")
         }
